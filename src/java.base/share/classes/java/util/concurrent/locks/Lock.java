@@ -170,10 +170,12 @@ public interface Lock {
 
     /**
      * Acquires the lock.
+     * 请求锁
      *
      * <p>If the lock is not available then the current thread becomes
      * disabled for thread scheduling purposes and lies dormant until the
      * lock has been acquired.
+     * 未获取到则阻塞
      *
      * <p><b>Implementation Considerations</b>
      *
@@ -188,18 +190,23 @@ public interface Lock {
     /**
      * Acquires the lock unless the current thread is
      * {@linkplain Thread#interrupt interrupted}.
+     * 获取锁除非线程被中断
      *
      * <p>Acquires the lock if it is available and returns immediately.
+     * 获取到则直接返回
      *
      * <p>If the lock is not available then the current thread becomes
      * disabled for thread scheduling purposes and lies dormant until
      * one of two things happens:
+     * 未获取到则会阻塞，直到发生以下两种情况
      *
      * <ul>
      * <li>The lock is acquired by the current thread; or
      * <li>Some other thread {@linkplain Thread#interrupt interrupts} the
      * current thread, and interruption of lock acquisition is supported.
      * </ul>
+     * 线程获取到锁 或者
+     * 当前线程被其他线程中断
      *
      * <p>If the current thread:
      * <ul>
@@ -240,6 +247,8 @@ public interface Lock {
      * with the value {@code true}.
      * If the lock is not available then this method will return
      * immediately with the value {@code false}.
+     * 获取锁成功返回 true
+     * 获取失败返回 false
      *
      * <p>A typical usage idiom for this method would be:
      * <pre> {@code
@@ -324,6 +333,7 @@ public interface Lock {
 
     /**
      * Releases the lock.
+     * 释放锁
      *
      * <p><b>Implementation Considerations</b>
      *
@@ -339,6 +349,7 @@ public interface Lock {
     /**
      * Returns a new {@link Condition} instance that is bound to this
      * {@code Lock} instance.
+     * 返回一个 Condition 实例，该实例与 Lock 实例绑定
      *
      * <p>Before waiting on the condition the lock must be held by the
      * current thread.
