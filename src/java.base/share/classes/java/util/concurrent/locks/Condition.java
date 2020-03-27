@@ -47,6 +47,10 @@ import java.util.concurrent.TimeUnit;
  * Where a {@code Lock} replaces the use of {@code synchronized} methods
  * and statements, a {@code Condition} replaces the use of the Object
  * monitor methods.
+ * <p>
+ * Condition 接口的存在主要用于替代 Object 类中的 monitor 方法，
+ * 比如 {@link Object#wait() wait} {@link Object#notify notify}等，
+ * 与 Lock 接口的实现配合实现同步控制。
  *
  * <p>Conditions (also known as <em>condition queues</em> or
  * <em>condition variables</em>) provide a means for one thread to
@@ -57,10 +61,18 @@ import java.util.concurrent.TimeUnit;
  * condition. The key property that waiting for a condition provides
  * is that it <em>atomically</em> releases the associated lock and
  * suspends the current thread, just like {@code Object.wait}.
+ * <p>
+ * Conditions 也被称为 condition queues 或者 condition variables。
+ * 提供了一些方法，用于将正在执行的线程挂起，等待直到满足某些状态条件后被其他线程通知。
+ * 因为状态条件可以被多个线程访问，因此状态条件需要被锁来维护。
  *
  * <p>A {@code Condition} instance is intrinsically bound to a lock.
  * To obtain a {@code Condition} instance for a particular {@link Lock}
  * instance use its {@link Lock#newCondition newCondition()} method.
+ * <p>
+ * Condition 实例从本质上分析是绑定了一个锁。
+ * <p>
+ * 以下是一个生产者消费者的 demo
  *
  * <p>As an example, suppose we have a bounded buffer which supports
  * {@code put} and {@code take} methods.  If a
@@ -72,6 +84,9 @@ import java.util.concurrent.TimeUnit;
  * only notifying a single thread at a time when items or spaces become
  * available in the buffer. This can be achieved using two
  * {@link Condition} instances.
+ * <p>
+ * 使用两个 Condition 实例来完成。 notFull 以及 notEmpty。
+ *
  * <pre>
  * class BoundedBuffer&lt;E&gt; {
  *   <b>final Lock lock = new ReentrantLock();</b>
@@ -111,7 +126,7 @@ import java.util.concurrent.TimeUnit;
  *   }
  * }
  * </pre>
- *
+ * ArrayBlockingQueue 中有该实现
  * (The {@link java.util.concurrent.ArrayBlockingQueue} class provides
  * this functionality, so there is no reason to implement this
  * sample usage class.)
@@ -174,27 +189,40 @@ import java.util.concurrent.TimeUnit;
  * shown that the interrupt occurred after another action that may have
  * unblocked the thread. An implementation should document this behavior.
  *
- * @since 1.5
  * @author Doug Lea
+ * @since 1.5
  */
 public interface Condition {
 
     /**
      * Causes the current thread to wait until it is signalled or
      * {@linkplain Thread#interrupt interrupted}.
+     * <p>
+     * 将当前的 thread 置于 wait 状态，直到被 signalled 或者被中断。
+     * 可响应：
+     * 1. signal
+     * 2. signalAll
+     * 3. 中断
+     * 4. spurious wakeup
+     * 不可响应：
+     * 1. 超时
      *
      * <p>The lock associated with this {@code Condition} is atomically
      * released and the current thread becomes disabled for thread scheduling
-     * purposes and lies dormant until <em>one</em> of four things happens:
+     * purposes and lies dormant 休眠的 until <em>one</em> of four things happens:
      * <ul>
      * <li>Some other thread invokes the {@link #signal} method for this
      * {@code Condition} and the current thread happens to be chosen as the
      * thread to be awakened; or
+     * 其他线程调用了该 Condition 的 {@link #signal} 方法并且当前线程正好是被选择唤醒的线程
      * <li>Some other thread invokes the {@link #signalAll} method for this
      * {@code Condition}; or
+     * 其他线程调用了该 Condition 的 {@link #signalAll} 方法。
      * <li>Some other thread {@linkplain Thread#interrupt interrupts} the
      * current thread, and interruption of thread suspension is supported; or
+     * 其他线程中断了当前线程，并且当前线程是支持中断的。
      * <li>A &quot;<em>spurious wakeup</em>&quot; occurs.
+     * 伪造的唤醒发生
      * </ul>
      *
      * <p>In all cases, before this method can return the current thread must
@@ -227,12 +255,21 @@ public interface Condition {
      * there is one.
      *
      * @throws InterruptedException if the current thread is interrupted
-     *         (and interruption of thread suspension is supported)
+     *                              (and interruption of thread suspension is supported)
      */
     void await() throws InterruptedException;
 
     /**
      * Causes the current thread to wait until it is signalled.
+     * <p>
+     * await 忽略中断
+     * 可响应：
+     * 1. signal
+     * 2. signalAll
+     * 3. spurious wakeup
+     * 不可响应：
+     * 1. 超时
+     * 2. 中断
      *
      * <p>The lock associated with this condition is atomically
      * released and the current thread becomes disabled for thread scheduling
@@ -270,6 +307,15 @@ public interface Condition {
     /**
      * Causes the current thread to wait until it is signalled or interrupted,
      * or the specified waiting time elapses.
+     * <p>
+     * await 可处理中断/接收通知/超时
+     * 可响应：
+     * 1. signal
+     * 2. signalAll
+     * 3. spurious wakeup
+     * 4. 中断
+     * 5. 超时
+     * 不可响应：无
      *
      * <p>The lock associated with this condition is atomically
      * released and the current thread becomes disabled for thread scheduling
@@ -350,13 +396,13 @@ public interface Condition {
      *
      * @param nanosTimeout the maximum time to wait, in nanoseconds
      * @return an estimate of the {@code nanosTimeout} value minus
-     *         the time spent waiting upon return from this method.
-     *         A positive value may be used as the argument to a
-     *         subsequent call to this method to finish waiting out
-     *         the desired time.  A value less than or equal to zero
-     *         indicates that no time remains.
+     * the time spent waiting upon return from this method.
+     * A positive value may be used as the argument to a
+     * subsequent call to this method to finish waiting out
+     * the desired time.  A value less than or equal to zero
+     * indicates that no time remains.
      * @throws InterruptedException if the current thread is interrupted
-     *         (and interruption of thread suspension is supported)
+     *                              (and interruption of thread suspension is supported)
      */
     long awaitNanos(long nanosTimeout) throws InterruptedException;
 
@@ -365,19 +411,29 @@ public interface Condition {
      * or the specified waiting time elapses. This method is behaviorally
      * equivalent to:
      * <pre> {@code awaitNanos(unit.toNanos(time)) > 0}</pre>
+     * <p>
+     * 与 {@link #awaitNanos(long) awaitNanos} 类似，自己可以定义计时类型
      *
      * @param time the maximum time to wait
      * @param unit the time unit of the {@code time} argument
      * @return {@code false} if the waiting time detectably elapsed
-     *         before return from the method, else {@code true}
+     * before return from the method, else {@code true}
      * @throws InterruptedException if the current thread is interrupted
-     *         (and interruption of thread suspension is supported)
+     *                              (and interruption of thread suspension is supported)
      */
     boolean await(long time, TimeUnit unit) throws InterruptedException;
 
     /**
      * Causes the current thread to wait until it is signalled or interrupted,
      * or the specified deadline elapses.
+     * <p>
+     * 可响应：
+     * 1. signal
+     * 2. signalAll
+     * 3. spurious wakeup
+     * 4. 中断
+     * 5. wait 到指定的时间，可以理解为超时
+     * 不可响应：无
      *
      * <p>The lock associated with this condition is atomically
      * released and the current thread becomes disabled for thread scheduling
@@ -446,14 +502,16 @@ public interface Condition {
      *
      * @param deadline the absolute time to wait until
      * @return {@code false} if the deadline has elapsed upon return, else
-     *         {@code true}
+     * {@code true}
      * @throws InterruptedException if the current thread is interrupted
-     *         (and interruption of thread suspension is supported)
+     *                              (and interruption of thread suspension is supported)
      */
     boolean awaitUntil(Date deadline) throws InterruptedException;
 
     /**
      * Wakes up one waiting thread.
+     * <p>
+     * 唤醒一个等待线程
      *
      * <p>If any threads are waiting on this condition then one
      * is selected for waking up. That thread must then re-acquire the
@@ -472,6 +530,8 @@ public interface Condition {
 
     /**
      * Wakes up all waiting threads.
+     * <p>
+     * 唤醒所有的等待线程
      *
      * <p>If any threads are waiting on this condition then they are
      * all woken up. Each thread must re-acquire the lock before it can
