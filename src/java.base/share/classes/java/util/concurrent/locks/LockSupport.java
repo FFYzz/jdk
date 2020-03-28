@@ -168,11 +168,13 @@ public class LockSupport {
      * #getBlocker getBlocker} for the current thread. This method may
      * be used before invoking the no-argument version of {@link
      * LockSupport#park() park()} from non-public objects, allowing
-     * more helpful diagnostics, or retaining compatibility with
+     * more helpful diagnostics 诊断, or retaining compatibility with
      * previous implementations of blocking methods.  Previous values
      * of the blocker are not automatically restored after blocking.
      * To obtain the effects of {@code park(b}}, use {@code
      * setCurrentBlocker(b); park(); setCurrentBlocker(null);}
+     * <p>
+     * 设置线程的阻塞对象
      *
      * @param blocker the blocker object
      * @since 14
@@ -473,8 +475,8 @@ public class LockSupport {
     // 以下三个变量都是 Thread 类中的成员变量
     private static final Unsafe U = Unsafe.getUnsafe();
     private static final long PARKBLOCKER
-        = U.objectFieldOffset(Thread.class, "parkBlocker");
+            = U.objectFieldOffset(Thread.class, "parkBlocker");
     private static final long TID
-        = U.objectFieldOffset(Thread.class, "tid");
+            = U.objectFieldOffset(Thread.class, "tid");
 
 }

@@ -43,23 +43,29 @@ package java.util.concurrent.locks;
  * use this information. However, subclasses and tools may use
  * appropriately maintained values to help control and monitor access
  * and provide diagnostics.
+ * <p>
+ * 用于设置当前的同步器的持有者，也就是当前的同步器由哪个线程占有。
  *
- * @since 1.6
  * @author Doug Lea
+ * @since 1.6
  */
 public abstract class AbstractOwnableSynchronizer
-    implements java.io.Serializable {
+        implements java.io.Serializable {
 
-    /** Use serial ID even though all fields transient. */
+    /**
+     * Use serial ID even though all fields transient.
+     */
     private static final long serialVersionUID = 3737899427754241961L;
 
     /**
      * Empty constructor for use by subclasses.
      */
-    protected AbstractOwnableSynchronizer() { }
+    protected AbstractOwnableSynchronizer() {
+    }
 
     /**
      * The current owner of exclusive mode synchronization.
+     * 独占持有者所属的线程
      */
     private transient Thread exclusiveOwnerThread;
 
@@ -68,6 +74,7 @@ public abstract class AbstractOwnableSynchronizer
      * A {@code null} argument indicates that no thread owns access.
      * This method does not otherwise impose any synchronization or
      * {@code volatile} field accesses.
+     *
      * @param thread the owner thread
      */
     protected final void setExclusiveOwnerThread(Thread thread) {
@@ -78,6 +85,7 @@ public abstract class AbstractOwnableSynchronizer
      * Returns the thread last set by {@code setExclusiveOwnerThread},
      * or {@code null} if never set.  This method does not otherwise
      * impose any synchronization or {@code volatile} field accesses.
+     *
      * @return the owner thread
      */
     protected final Thread getExclusiveOwnerThread() {
