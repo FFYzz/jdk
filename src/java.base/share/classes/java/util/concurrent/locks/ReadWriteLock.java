@@ -108,16 +108,17 @@ package java.util.concurrent.locks;
  * You should consider all of these things when evaluating the suitability
  * of a given implementation for your application.
  *
+ * @author Doug Lea
  * @see ReentrantReadWriteLock
  * @see Lock
  * @see ReentrantLock
- *
  * @since 1.5
- * @author Doug Lea
  */
 public interface ReadWriteLock {
     /**
      * Returns the lock used for reading.
+     * <p>
+     * 返回读锁
      *
      * @return the lock used for reading
      */
@@ -125,6 +126,8 @@ public interface ReadWriteLock {
 
     /**
      * Returns the lock used for writing.
+     * <p>
+     * 返回写锁
      *
      * @return the lock used for writing
      */
